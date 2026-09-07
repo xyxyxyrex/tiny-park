@@ -1,0 +1,11 @@
+{
+  "name": "tiny-park",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A small cooperative browser platformer with PeerJS/WebRTC multiplayer.",
+  "scripts": {
+    "test": "node --check js/app.js && node --check js/game.js && node --check js/levels.js && node --check js/network.js && node tests/smoke.mjs",
+    "serve": "npx serve ."
+  }
+}
