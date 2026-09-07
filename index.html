@@ -1,69 +1,47 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#f4efe6" />
-  <meta name="description" content="Tiny Park — a small cooperative browser platformer using WebRTC multiplayer." />
-  <title>Tiny Park</title>
-  <link rel="stylesheet" href="./styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="./assets/imgs/favicon.png">
+    <title>Microscopic Natural Area for Public Recreational Activities</title>
 </head>
 <body>
-  <main class="shell">
-    <section id="lobby" class="lobby" aria-labelledby="title">
-      <div class="brand-block">
-        <p class="kicker">CO-OP BROWSER PLATFORMER</p>
-        <h1 id="title">TINY<br />PARK</h1>
-        <p class="lede">Make a room, share the code, and get everyone through the door.</p>
-      </div>
+    <h1>Microscopic Natural Area for Public Recreational Activities</h1>
+    Host Game <button href="yay"  onClick="(function(){
+        window.open('./game.html?host=true','_self')
+        return false;
+    })();return false;">Create Room</button><br>
+    <hr>
+    <b>Join Room</b><br>
+    Username <input id="usernameInpt" onchange="(function(){
+        localStorage.setItem('username', document.getElementById('usernameInpt').value)
+        return false;
+    })();return false;" type="text"><br>
+    <script>
+        let name = localStorage.getItem("username")
+        name = name||""
+        document.getElementById("usernameInpt").value = name
+    </script>
+    Room Code <input id="codeinpt" type="text"><button onClick="(function(){
+        window.open(`./game.html?join=${getCode().toUpperCase()}`,'_self')
+        return false;
+    })();return false;" id="joinButton">Join</button>
+    <script>
+        let input = document.getElementById("codeinpt")
+        input.addEventListener("keypress", function(event) {
+  // If the user presses the "Enter" key on the keyboard
+  if (event.key === "Enter") {
+    // Cancel the default action, if needed
+    event.preventDefault();
+    // Trigger the button element with a click
+    document.getElementById("joinButton").click();
+  }
+});
+    </script>
 
-      <div class="lobby-card">
-        <label class="field-label" for="player-name">PLAYER NAME</label>
-        <input id="player-name" maxlength="16" autocomplete="nickname" placeholder="Player" />
+    <br><br><a href="./lvl.html">[Level Editor]</a>
 
-        <button id="create-room" class="primary-btn" type="button">CREATE ROOM</button>
-
-        <div class="divider"><span>OR JOIN</span></div>
-
-        <label class="field-label" for="room-code">ROOM CODE</label>
-        <div class="join-row">
-          <input id="room-code" maxlength="6" inputmode="text" autocomplete="off" placeholder="ABCDE" />
-          <button id="join-room" class="secondary-btn" type="button">JOIN</button>
-        </div>
-
-        <p id="lobby-status" class="status" role="status" aria-live="polite"></p>
-      </div>
-    </section>
-
-    <section id="game-screen" class="game-screen is-hidden" aria-label="Tiny Park game">
-      <header class="game-bar">
-        <div>
-          <span class="meta-label">ROOM</span>
-          <button id="copy-room" class="room-code-button" type="button" title="Copy room code">-----</button>
-        </div>
-        <div class="game-title">TINY PARK</div>
-        <div class="right-meta">
-          <span id="connection-state" class="connection-state">OFFLINE</span>
-          <span id="player-count" class="player-count">1 PLAYER</span>
-        </div>
-      </header>
-
-      <div class="canvas-wrap">
-        <canvas id="game-canvas" width="1200" height="720"></canvas>
-        <div id="game-message" class="game-message is-hidden" role="status"></div>
-      </div>
-
-      <footer class="game-footer">
-        <span><kbd>A</kbd><kbd>D</kbd> MOVE</span>
-        <span><kbd>W</kbd> / <kbd>SPACE</kbd> JUMP</span>
-        <span class="objective">GET THE KEY. GET EVERYONE OUT.</span>
-        <button id="leave-room" class="text-btn" type="button">LEAVE ROOM</button>
-      </footer>
-    </section>
-  </main>
-
-  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
-  <script type="module" src="./js/app.js"></script>
+    <script>function getCode(){return document.getElementById("codeinpt").value}</script>
 </body>
 </html>

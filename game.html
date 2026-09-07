@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <script src="./libs/common.js"></script>
+    <script src="./libs/matter.min.js"></script>
+    <script src="./libs/matterjsRaycast.js"></script>
+    <script src="./libs/peer.js"></script>
+    <script src="libs/words.js"></script>
+
+    <link rel="icon" href="./assets/imgs/favicon.png">
+    <title id="title">Microscopic Natural Area for Public Recreational Activities</title>
+
+    <style>
+        @font-face {
+            font-family: squareforced;
+            src: local('FORCEDSQUARE'), url(./assets/FORCEDSQUARE.ttf) format('truetype');
+
+        }
+        body {
+            margin: 0%;
+            overflow: hidden;
+        }
+        .overlay {
+            position: fixed;
+            top: 0%;
+            left: 0%;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <script>
+        var url = location.href,
+            urlData = url.split("?").splice(-1,1)
+
+        data = {}
+        urlData.forEach((e)=>{
+            data[e.split("=")[0]] = e.split("=")[1]
+        })
+
+        urlData = data
+    </script>
+
+    <canvas id="c" style="display: none;"></canvas>
+    <div class="overlay">
+        <a href="./index.html">Back to Home</a> | 
+        <a style="display: none;" id="restartLevel" href="#"  onClick="(function(){
+            mainGame.levelHandler.setLevel(mainGame.levelHandler.currentLevel.name)
+            return false;
+        })();return false;">Restart Level</a>
+    </div>
+    <script src="./src/multiplayer.js"></script>
+    <script src="./src/buttons.js"></script>
+    <script src="./src/door.js"></script>
+    <script src="./src/trigger.js"></script>
+    <script src="./src/blocks.js"></script>
+    <script src="./src/lasers.js"></script>
+    <script src="./src/jumppad.js"></script>
+
+    <script src="./src/levels.js"></script>
+    <script src="./src/level.js"></script>
+
+    <script src="./src/matterInit.js"></script>
+    <script src="./src/atlasSetup.js"></script>
+
+    <script src="src/syncController.js"></script>
+
+    <script src="./src/controls.js"></script>
+    <script src="./src/update.js"></script>
+
+    <script src="./src/player.js"></script>
+    <script src="./src/render.js"></script>
+
+    <script src="./src/entity.js"></script>
+    <script src="src/particles.js"></script>
+
+    <script src="./src/game.js"></script>
+
+    <script src="./src/constraints.js"></script>
+
+    <script src="./src/host.js"></script>
+    <script src="./src/client.js"></script>
+
+    <script src="./src/menu.js"></script>
+
+    <div id="menu">
+        <br>
+        <div id="host" style="display: none;">
+            <div id="gameDetails">
+                <div id="gameCode">Code: <b id="roomCode">fetching</b><span id="incoming"></span></div>
+                <a id="copyLink" href="#" onclick="(function(){
+        navigator.clipboard.writeText(`https://aeolus-1.github.io/picoParkClone/game.html?join=${hostConnection.joinConn.selfId}`);
+        return false;
+    })();return false;">[Copy Link]</a>
+            </div>
+            <div id="memberList" style="border: solid black 1px; width:200px">
+                <h2>Members:</h2>
+                <div id="memberlist"></div>
+                <div>Host<br></div>
+
+            </div>
+            <button onClick="(function(){
+                mainGame.playerhandler.addPlayer({
+                    controls:['a','d','w','s'],
+                    keys:keys,
+                    color:mainGame.fetchColor(),
+                })
+                addPlayerToMenu('Player2')
+                return false;
+            })();return false;">Add local co-op Player</button>
+<hr>
+            <button onClick="(function(){
+                startGame()
+                hostConnection.broadcast(JSON.stringify({
+                    startGame:true,
+                }))
+                return false;
+            })();return false;">Start Game</button>
+            </div>
+
+        <div id="join" style="display: none;">
+            Waiting for host to start (maybe idk really)
+        </div>
+    </div>
+
+    <script>
+        window.localfile = location.protocol=="file:"
+        function initGame() {
+            window.mainGame = new Game()
+
+            var player1 = mainGame.playerhandler.addPlayer({
+            controls:["arrowleft","arrowright","arrowup","arrowdown"],
+            keys:keys,
+        }) 
+
+            window.hostConnection;window.clientConnection
+            if (urlData.host) {hostConnection = new Host(mainGame);hostConnection.init()}
+            if (urlData.join) {
+                clientConnection = new Client(mainGame,player1);clientConnection.init(urlData.join)
+                document.getElementById("restartLevel").style.display = "none"
+            }
+            if (!urlData.host&&!urlData.join) startGame()
+
+
+            setInterval(() => {
+                if (window.hostConnection) hostConnection.updateClients()
+                if (window.clientConnection) clientConnection.updateHost()
+
+            }, 10);
+
+            setInterval(() => {
+                mainGame.players.forEach((e)=>{if(!e.onlinePlayer) e.updateKeys(keys)})
+            }, 5);
+            
+        }
+        function startMainGame() {
+            mainGame.testInit()
+            mainGame.initRender()
+        }
+
+       
+
+
+        window.onload=()=>{
+            _loadFont("squareforced")
+
+            if (urlData.host) {
+                document.getElementById("host").style.display = ""
+            } else if (urlData.join) {
+                document.getElementById("join").style.display = ""
+            }
+
+            initGame()
+
+            let tempLevel = localStorage.getItem("tempLevel")
+            console.log(tempLevel)
+            if (tempLevel != null) {
+                let levelString = `({${atob(tempLevel)}})`
+                document.getElementById("gameCode").innerHTML = "-- temp level loaded --"
+                document.getElementById("title").textContent = "temp-level"
+                document.getElementById("copyLink").style.display = "none"
+                levels.tempLevel = eval(levelString)["tempName"]
+                mainGame.runTemp = true
+                localStorage.removeItem("tempLevel")
+                    
+            }
+        }
+        function setLevel(lvl) {
+    mainGame.renderer.levelTransistion(lvl)
+                            if (window.hostConnection) {
+                                hostConnection.broadcast(JSON.stringify({
+                                    setLevel:lvl,
+                                }))
+                            }
+}
+       
+    </script>
+
+</body>
+</html>
